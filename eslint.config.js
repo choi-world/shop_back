@@ -1,4 +1,5 @@
 const tseslint = require('typescript-eslint');
+const prettierConfig = require('eslint-config-prettier');
 
 module.exports = tseslint.config(
   {
@@ -7,5 +8,10 @@ module.exports = tseslint.config(
   {
     files: ['**/*.ts'],
     extends: [...tseslint.configs.recommended],
-  }
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'always' }],
+    },
+  },
+  prettierConfig,
 );
