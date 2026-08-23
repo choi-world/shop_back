@@ -5,6 +5,7 @@ import { PrismaClient } from './generated/prisma/client';
 import { PrismaCartRepository } from './adapter/out/persistence/PrismaCartRepository';
 import { CartService } from './domain/cart/CartService';
 import { createCartController } from './adapter/in/http/CartController';
+import { errorHandler } from './adapter/in/http/errorHandler';
 
 // Composition root: the only place that knows about concrete adapters and
 // wires them into the domain's ports. Nothing above this layer imports Express/Prisma directly.
@@ -23,6 +24,7 @@ const cartUseCase = new CartService(cartRepository);
 const app = express();
 app.use(express.json());
 app.use('/api', createCartController(cartUseCase));
+app.use(errorHandler);
 
 const PORT = process.env.PORT ?? 3000;
 app.listen(PORT, () => console.log(`listening on port ${PORT}`));
