@@ -2,10 +2,15 @@ import { ErrorRequestHandler } from 'express';
 import { ValidationError } from '../../../domain/error/ValidationError';
 import { NotFoundError } from '../../../domain/error/NotFoundError';
 import { ConflictError } from '../../../domain/error/ConflictError';
+import { UnauthorizedError } from '../../../domain/error/UnauthorizedError';
 
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof ValidationError) {
     res.status(400).json({ error: err.message });
+    return;
+  }
+  if (err instanceof UnauthorizedError) {
+    res.status(401).json({ error: err.message });
     return;
   }
   if (err instanceof NotFoundError) {

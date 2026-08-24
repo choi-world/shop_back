@@ -1,5 +1,5 @@
 import { PrismaClient } from '../../../generated/prisma/client';
-import { UserRepository } from '../../../domain/port/out/UserRepository';
+import { UserRepository, CreateUserCommand } from '../../../domain/port/out/UserRepository';
 import { User } from '../../../domain/user/User';
 
 export class PrismaUserRepository implements UserRepository {
@@ -11,6 +11,18 @@ export class PrismaUserRepository implements UserRepository {
     });
 
     if (!row || row.is_deleted) return null;
+
+    return new User(Number(row.user_idx), row.name, row.phone_number, row.gender);
+  }
+
+  async save(command: CreateUserCommand): Promise<User> {
+    const row = await this.prisma.users.create({
+      data: {
+        name: command.name,
+        phone_number: command.phoneNumber,
+        gender: command.gender,
+      },
+    });
 
     return new User(Number(row.user_idx), row.name, row.phone_number, row.gender);
   }

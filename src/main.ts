@@ -7,10 +7,15 @@ import { PrismaProductRepository } from './adapter/out/persistence/PrismaProduct
 import { PrismaUserRepository } from './adapter/out/persistence/PrismaUserRepository';
 import { PrismaOrderRepository } from './adapter/out/persistence/PrismaOrderRepository';
 import { MockPaymentGateway } from './adapter/out/payment/MockPaymentGateway';
+import { PrismaAuthRepository } from './adapter/out/persistence/PrismaAuthRepository';
+import { BcryptPasswordHasher } from './adapter/out/security/BcryptPasswordHasher';
+import { JwtTokenIssuer } from './adapter/out/security/JwtTokenIssuer';
 import { CartService } from './domain/cart/CartService';
 import { OrderService } from './domain/order/OrderService';
+import { AuthService } from './domain/auth/AuthService';
 import { createCartController } from './adapter/in/http/CartController';
 import { createOrderController } from './adapter/in/http/OrderController';
+import { createAuthController } from './adapter/in/http/AuthController';
 import { errorHandler } from './adapter/in/http/errorHandler';
 
 // Composition root: the only place that knows about concrete adapters and
@@ -37,11 +42,16 @@ const orderUseCase = new OrderService(
   productRepository,
   userRepository,
 );
+const authRepository = new PrismaAuthRepository(prisma);
+const passwordHasher = new BcryptPasswordHasher();
+const tokenIssuer = new JwtTokenIssuer(process.env.JWT_SECRET!);
+const authUseCase = new AuthService(authRepository, userRepository, passwordHasher, tokenIssuer);
 
 const app = express();
 app.use(express.json());
 app.use('/api', createCartController(cartUseCase));
 app.use('/api', createOrderController(orderUseCase));
+app.use('/api', createAuthController(authUseCase));
 app.use(errorHandler);
 
 const PORT = process.env.PORT ?? 3000;

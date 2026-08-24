@@ -61,6 +61,7 @@ model users {
   is_deleted      Boolean           @default(false)
   created_dt      DateTime?         @default(now()) @db.DateTime(0)
   updated_dt      DateTime?         @default(now()) @db.DateTime(0)
+  auth            auth[]
   shopping_basket shopping_basket[]
 }
 
@@ -110,5 +111,22 @@ model orders {
   created_dt     DateTime? @default(now()) @db.DateTime(0)
   updated_dt     DateTime? @default(now()) @db.DateTime(0)
 
+  @@index([user_idx], map: "user_idx")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model auth {
+  auth_idx      BigInt    @id @default(autoincrement())
+  user_idx      BigInt
+  provider      String    @db.VarChar(20)
+  provider_key  String    @db.VarChar(255)
+  account_name  String?   @db.VarChar(255)
+  password_hash String?   @db.VarChar(255)
+  is_deleted    Boolean   @default(false)
+  created_dt    DateTime? @default(now()) @db.DateTime(0)
+  updated_dt    DateTime? @default(now()) @db.DateTime(0)
+  users         users     @relation(fields: [user_idx], references: [user_idx], onDelete: NoAction, onUpdate: NoAction, map: "fk_auth_user")
+
+  @@unique([provider, provider_key], map: "uk_auth_provider_key")
   @@index([user_idx], map: "user_idx")
 }
