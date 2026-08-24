@@ -65,4 +65,14 @@ export class CartService implements CartUseCase {
 
     return this.cartRepository.findByUser(userIdx);
   }
+
+  async delete(userIdx: number, productIdx: number): Promise<void> {
+    const user = await this.userRepository.findById(userIdx);
+    if (!user) throw new NotFoundError('유저를 찾을 수 없습니다.');
+
+    const existing = await this.cartRepository.findByUserAndProduct(userIdx, productIdx);
+    if (!existing) throw new NotFoundError('장바구니에 담긴 상품이 아닙니다.');
+
+    return this.cartRepository.delete(userIdx, productIdx);
+  }
 }

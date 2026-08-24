@@ -16,4 +16,5 @@ export interface CartUseCase {
   create(body: CartCreateRequest): Promise<number>;
   update(body: CartUpdateRequest): Promise<number>;
   list(userIdx: number): Promise<CartItemView[]>;
+  delete(userIdx: number, productIdx: number): Promise<void>;
 }

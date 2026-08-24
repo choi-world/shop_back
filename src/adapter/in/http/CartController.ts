@@ -42,5 +42,16 @@ export function createCartController(cartUseCase: CartUseCase): Router {
     res.status(200).json(quantity);
   });
 
+  router.delete('/cart/:userIdx/:productIdx', async (req, res) => {
+    const userIdx = Number(req.params.userIdx);
+    const productIdx = Number(req.params.productIdx);
+    if (Number.isNaN(userIdx) || Number.isNaN(productIdx)) {
+      throw new ValidationError('userIdx, productIdx는 숫자여야 합니다.');
+    }
+
+    await cartUseCase.delete(userIdx, productIdx);
+    res.status(204).send();
+  });
+
   return router;
 }

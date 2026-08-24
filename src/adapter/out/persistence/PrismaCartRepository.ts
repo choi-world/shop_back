@@ -71,6 +71,17 @@ export class PrismaCartRepository implements CartRepository {
 
     return updated.quantity;
   }
+
+  async delete(userIdx: number, productIdx: number): Promise<void> {
+    await this.prisma.shopping_basket.delete({
+      where: {
+        user_idx_product_idx: {
+          user_idx: userIdx,
+          product_idx: productIdx,
+        },
+      },
+    });
+  }
 }
 
 function toDomain(row: {
