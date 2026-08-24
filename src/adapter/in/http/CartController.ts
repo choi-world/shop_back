@@ -20,5 +20,20 @@ export function createCartController(cartUseCase: CartUseCase): Router {
     res.status(200).json(baskets);
   });
 
+  router.patch('/cart/:userIdx/:productIdx', async (req, res) => {
+    const userIdx = Number(req.params.userIdx);
+    const productIdx = Number(req.params.productIdx);
+    if (Number.isNaN(userIdx) || Number.isNaN(productIdx)) {
+      throw new ValidationError('userIdx, productIdx는 숫자여야 합니다.');
+    }
+
+    const quantity = await cartUseCase.update({
+      user_idx: userIdx,
+      product_idx: productIdx,
+      quantity: req.body.quantity,
+    });
+    res.status(200).json(quantity);
+  });
+
   return router;
 }

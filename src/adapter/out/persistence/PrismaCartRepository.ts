@@ -57,6 +57,20 @@ export class PrismaCartRepository implements CartRepository {
       quantity: row.quantity,
     }));
   }
+
+  async updateQuantity(userIdx: number, productIdx: number, quantity: number): Promise<number> {
+    const updated = await this.prisma.shopping_basket.update({
+      where: {
+        user_idx_product_idx: {
+          user_idx: userIdx,
+          product_idx: productIdx,
+        },
+      },
+      data: { quantity },
+    });
+
+    return updated.quantity;
+  }
 }
 
 function toDomain(row: {

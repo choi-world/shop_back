@@ -1,4 +1,4 @@
-import { CartCreateRequest, CartUseCase } from '../port/in/CartUseCase';
+import { CartCreateRequest, CartUpdateRequest, CartUseCase } from '../port/in/CartUseCase';
 import { CartRepository } from '../port/out/CartRepository';
 import { ProductRepository } from '../port/out/ProductRepository';
 import { UserRepository } from '../port/out/UserRepository';
@@ -32,6 +32,31 @@ export class CartService implements CartUseCase {
     });
 
     return this.cartRepository.save(basket);
+  }
+
+  async update(req: CartUpdateRequest): Promise<number> {
+    const user = await this.userRepository.findById(req.user_idx);
+    if (!user) throw new NotFoundError('유저를 찾을 수 없습니다.');
+
+    const product = await this.productRepository.findById(req.product_idx);
+    if (!product) throw new NotFoundError('상품을 찾을 수 없습니다.');
+
+    const existing = await this.cartRepository.findByUserAndProduct(req.user_idx, req.product_idx);
+    if (!existing) throw new NotFoundError('장바구니에 담긴 상품이 아닙니다.');
+
+    if (product.stock < req.quantity) throw new ConflictError('재고가 부족합니다.');
+
+    const updated = new ShoppingBasket({
+      userIdx: req.user_idx,
+      productIdx: req.product_idx,
+      quantity: req.quantity,
+    });
+
+    return this.cartRepository.updateQuantity(
+      updated.userIdx,
+      updated.productIdx,
+      updated.quantity,
+    );
   }
 
   async list(userIdx: number): Promise<CartItemView[]> {
