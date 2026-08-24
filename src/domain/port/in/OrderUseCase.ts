@@ -13,6 +13,7 @@ export interface CheckoutRequest {
 
 export interface ConfirmRequest {
   order_idx: number;
+  user_idx: number;
   payment_key: string;
 }
 

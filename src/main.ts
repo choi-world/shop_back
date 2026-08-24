@@ -49,8 +49,8 @@ const authUseCase = new AuthService(authRepository, userRepository, passwordHash
 
 const app = express();
 app.use(express.json());
-app.use('/api', createCartController(cartUseCase));
-app.use('/api', createOrderController(orderUseCase));
+app.use('/api', createCartController(cartUseCase, tokenIssuer));
+app.use('/api', createOrderController(orderUseCase, tokenIssuer));
 app.use('/api', createAuthController(authUseCase));
 app.use(errorHandler);
 

@@ -68,7 +68,10 @@ export class OrderService implements OrderUseCase {
   // (클라이언트가 보낸 성공/실패 값을 그대로 믿지 않는다).
   async confirm(req: ConfirmRequest): Promise<Order> {
     const order = await this.orderRepository.findById(req.order_idx);
-    if (!order) throw new NotFoundError('주문을 찾을 수 없습니다.');
+    // 존재하지 않는 주문과 "존재하지만 내 것이 아닌 주문"을 같은 메시지로 처리해서,
+    // 다른 사람의 orderIdx를 추측해도 존재 여부조차 알 수 없게 한다.
+    if (!order || order.userIdx !== req.user_idx)
+      throw new NotFoundError('주문을 찾을 수 없습니다.');
     if (order.status !== 'PENDING') throw new ConflictError('이미 처리된 주문입니다.');
 
     const verification = await this.paymentGateway.verify(req.payment_key);

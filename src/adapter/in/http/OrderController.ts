@@ -1,19 +1,23 @@
 import { Router } from 'express';
 import { OrderUseCase } from '../../../domain/port/in/OrderUseCase';
 import { ValidationError } from '../../../domain/error/ValidationError';
+import { TokenIssuer } from '../../../domain/port/out/TokenIssuer';
+import { createAuthMiddleware } from './authMiddleware';
 
-export function createOrderController(orderUseCase: OrderUseCase): Router {
+export function createOrderController(
+  orderUseCase: OrderUseCase,
+  tokenIssuer: TokenIssuer,
+): Router {
   const router = Router();
+  const requireAuth = createAuthMiddleware(tokenIssuer);
 
-  router.post('/orders/:userIdx/checkout', async (req, res) => {
-    const userIdx = Number(req.params.userIdx);
-    if (Number.isNaN(userIdx)) throw new ValidationError('userIdx는 숫자여야 합니다.');
+  router.post('/orders/checkout', requireAuth, async (req, res) => {
     if (!Array.isArray(req.body.product_idxs)) {
       throw new ValidationError('product_idxs는 배열이어야 합니다.');
     }
 
     const order = await orderUseCase.checkout({
-      user_idx: userIdx,
+      user_idx: req.userIdx!,
       product_idxs: req.body.product_idxs,
       zonecode: req.body.zonecode,
       road_address: req.body.road_address,
@@ -25,12 +29,13 @@ export function createOrderController(orderUseCase: OrderUseCase): Router {
     res.status(201).json(order);
   });
 
-  router.post('/orders/:orderIdx/confirm', async (req, res) => {
+  router.post('/orders/:orderIdx/confirm', requireAuth, async (req, res) => {
     const orderIdx = Number(req.params.orderIdx);
     if (Number.isNaN(orderIdx)) throw new ValidationError('orderIdx는 숫자여야 합니다.');
 
     const order = await orderUseCase.confirm({
       order_idx: orderIdx,
+      user_idx: req.userIdx!,
       payment_key: req.body.payment_key,
     });
     res.status(200).json(order);
