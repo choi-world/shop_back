@@ -3,6 +3,8 @@ import express from 'express';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { PrismaClient } from './generated/prisma/client';
 import { PrismaCartRepository } from './adapter/out/persistence/PrismaCartRepository';
+import { PrismaProductRepository } from './adapter/out/persistence/PrismaProductRepository';
+import { PrismaUserRepository } from './adapter/out/persistence/PrismaUserRepository';
 import { CartService } from './domain/cart/CartService';
 import { createCartController } from './adapter/in/http/CartController';
 import { errorHandler } from './adapter/in/http/errorHandler';
@@ -19,7 +21,9 @@ const adapter = new PrismaMariaDb({
 });
 const prisma = new PrismaClient({ adapter });
 const cartRepository = new PrismaCartRepository(prisma);
-const cartUseCase = new CartService(cartRepository);
+const productRepository = new PrismaProductRepository(prisma);
+const userRepository = new PrismaUserRepository(prisma);
+const cartUseCase = new CartService(cartRepository, productRepository, userRepository);
 
 const app = express();
 app.use(express.json());
