@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { CartUseCase } from '../../../domain/port/in/CartUseCase';
+import { ValidationError } from '../../../domain/error/ValidationError';
 
 export function createCartController(cartUseCase: CartUseCase): Router {
   const router = Router();
@@ -9,6 +10,14 @@ export function createCartController(cartUseCase: CartUseCase): Router {
   router.post('/cart', async (req, res) => {
     const basket = await cartUseCase.create(req.body);
     res.status(201).json(basket);
+  });
+
+  router.get('/cart/:userIdx', async (req, res) => {
+    const userIdx = Number(req.params.userIdx);
+    if (Number.isNaN(userIdx)) throw new ValidationError('userIdx는 숫자여야 합니다.');
+
+    const baskets = await cartUseCase.list(userIdx);
+    res.status(200).json(baskets);
   });
 
   return router;

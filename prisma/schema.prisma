@@ -27,14 +27,15 @@ model knex_migrations_lock {
 }
 
 model product {
-  product_idx BigInt    @id @default(autoincrement())
-  company_idx BigInt
-  name        String    @db.VarChar(255)
-  price       BigInt    @db.UnsignedBigInt
-  stock       BigInt    @db.UnsignedBigInt
-  is_deleted  Boolean   @default(false)
-  created_dt  DateTime? @default(now()) @db.DateTime(0)
-  updated_dt  DateTime? @default(now()) @db.DateTime(0)
+  product_idx     BigInt            @id @default(autoincrement())
+  company_idx     BigInt
+  name            String            @db.VarChar(255)
+  price           BigInt            @db.UnsignedBigInt
+  stock           BigInt            @db.UnsignedBigInt
+  is_deleted      Boolean           @default(false)
+  created_dt      DateTime?         @default(now()) @db.DateTime(0)
+  updated_dt      DateTime?         @default(now()) @db.DateTime(0)
+  shopping_basket shopping_basket[]
 
   @@index([company_idx], map: "company_idx")
 }
@@ -45,18 +46,22 @@ model shopping_basket {
   quantity    Int       @db.UnsignedInt
   created_dt  DateTime? @default(now()) @db.DateTime(0)
   updated_dt  DateTime? @default(now()) @db.DateTime(0)
+  product     product   @relation(fields: [product_idx], references: [product_idx], onDelete: NoAction, onUpdate: NoAction, map: "fk_shopping_basket_product")
+  users       users     @relation(fields: [user_idx], references: [user_idx], onDelete: NoAction, onUpdate: NoAction, map: "fk_shopping_basket_user")
 
   @@id([user_idx, product_idx])
+  @@index([product_idx], map: "fk_shopping_basket_product")
 }
 
 model users {
-  user_idx     BigInt    @id @default(autoincrement())
-  name         String    @db.VarChar(50)
-  phone_number String    @db.VarChar(50)
-  gender       Boolean
-  is_deleted   Boolean   @default(false)
-  created_dt   DateTime? @default(now()) @db.DateTime(0)
-  updated_dt   DateTime? @default(now()) @db.DateTime(0)
+  user_idx        BigInt            @id @default(autoincrement())
+  name            String            @db.VarChar(50)
+  phone_number    String            @db.VarChar(50)
+  gender          Boolean
+  is_deleted      Boolean           @default(false)
+  created_dt      DateTime?         @default(now()) @db.DateTime(0)
+  updated_dt      DateTime?         @default(now()) @db.DateTime(0)
+  shopping_basket shopping_basket[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

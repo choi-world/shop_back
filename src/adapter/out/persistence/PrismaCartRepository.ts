@@ -1,6 +1,7 @@
 import { PrismaClient } from '../../../generated/prisma/client';
 import { CartRepository } from '../../../domain/port/out/CartRepository';
 import { ShoppingBasket } from '../../../domain/cart/ShoppingBasket';
+import { CartItemView } from '../../../domain/cart/CartItemView';
 
 export class PrismaCartRepository implements CartRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -36,14 +37,40 @@ export class PrismaCartRepository implements CartRepository {
       },
     });
 
-    if (!row) return null;
-
-    return new ShoppingBasket({
-      userIdx: Number(row.user_idx),
-      productIdx: Number(row.product_idx),
-      quantity: row.quantity,
-      createdDt: row.created_dt ?? undefined,
-      updatedDt: row.updated_dt ?? undefined,
-    });
+    return row ? toDomain(row) : null;
   }
+
+  async findByUser(userIdx: number): Promise<CartItemView[]> {
+    const rows = await this.prisma.shopping_basket.findMany({
+      where: { user_idx: userIdx, product: { is_deleted: false } },
+      include: {
+        product: {
+          select: { name: true, price: true },
+        },
+      },
+    });
+
+    return rows.map((row) => ({
+      productIdx: Number(row.product_idx),
+      productName: row.product.name,
+      price: Number(row.product.price),
+      quantity: row.quantity,
+    }));
+  }
+}
+
+function toDomain(row: {
+  user_idx: bigint;
+  product_idx: bigint;
+  quantity: number;
+  created_dt: Date | null;
+  updated_dt: Date | null;
+}): ShoppingBasket {
+  return new ShoppingBasket({
+    userIdx: Number(row.user_idx),
+    productIdx: Number(row.product_idx),
+    quantity: row.quantity,
+    createdDt: row.created_dt ?? undefined,
+    updatedDt: row.updated_dt ?? undefined,
+  });
 }

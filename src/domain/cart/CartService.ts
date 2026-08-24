@@ -3,6 +3,7 @@ import { CartRepository } from '../port/out/CartRepository';
 import { ProductRepository } from '../port/out/ProductRepository';
 import { UserRepository } from '../port/out/UserRepository';
 import { ShoppingBasket } from './ShoppingBasket';
+import { CartItemView } from './CartItemView';
 import { NotFoundError } from '../error/NotFoundError';
 import { ConflictError } from '../error/ConflictError';
 
@@ -31,5 +32,12 @@ export class CartService implements CartUseCase {
     });
 
     return this.cartRepository.save(basket);
+  }
+
+  async list(userIdx: number): Promise<CartItemView[]> {
+    const user = await this.userRepository.findById(userIdx);
+    if (!user) throw new NotFoundError('유저를 찾을 수 없습니다.');
+
+    return this.cartRepository.findByUser(userIdx);
   }
 }
