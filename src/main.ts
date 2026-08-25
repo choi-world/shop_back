@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './adapter/in/http/swagger';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { PrismaClient } from './generated/prisma/client';
 import { PrismaCartRepository } from './adapter/out/persistence/PrismaCartRepository';
@@ -49,6 +51,7 @@ const authUseCase = new AuthService(authRepository, userRepository, passwordHash
 
 const app = express();
 app.use(express.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', createCartController(cartUseCase, tokenIssuer));
 app.use('/api', createOrderController(orderUseCase, tokenIssuer));
 app.use('/api', createAuthController(authUseCase));
