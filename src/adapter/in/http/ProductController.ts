@@ -3,7 +3,13 @@ import { ProductUseCase } from '../../../domain/port/in/ProductUseCase';
 import { ValidationError } from '../../../domain/error/ValidationError';
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_SIZE = 20;
+const DEFAULT_SIZE = 10;
+
+// page/size는 숫자가 아니거나(Infinity, 소수 등 포함) 1 미만이면 에러 대신 디폴트로 조정한다.
+function parsePositiveInt(value: unknown, fallback: number): number {
+  const num = Number(value);
+  return Number.isFinite(num) && Number.isInteger(num) && num >= 1 ? num : fallback;
+}
 
 export function createProductController(productUseCase: ProductUseCase): Router {
   const router = Router();
@@ -19,21 +25,20 @@ export function createProductController(productUseCase: ProductUseCase): Router 
    *       - in: query
    *         name: page
    *         schema: { type: integer, default: 1 }
+   *         description: 숫자가 아니거나 1 미만이면 디폴트(1)로 처리
    *       - in: query
    *         name: size
-   *         schema: { type: integer, default: 20 }
+   *         schema: { type: integer, default: 10 }
+   *         description: 숫자가 아니거나 1 미만이면 디폴트(10)로 처리
    *     responses:
    *       200:
    *         description: 상품 목록과 총 개수
    *       400:
-   *         description: page, size가 유효하지 않음
+   *         description: size가 최대치를 초과함
    */
   router.get('/products', async (req, res) => {
-    const page = req.query.page ? Number(req.query.page) : DEFAULT_PAGE;
-    const size = req.query.size ? Number(req.query.size) : DEFAULT_SIZE;
-    if (Number.isNaN(page) || Number.isNaN(size)) {
-      throw new ValidationError('page, size는 숫자여야 합니다.');
-    }
+    const page = parsePositiveInt(req.query.page, DEFAULT_PAGE);
+    const size = parsePositiveInt(req.query.size, DEFAULT_SIZE);
 
     const result = await productUseCase.list({ page, size });
     res.status(200).json(result);

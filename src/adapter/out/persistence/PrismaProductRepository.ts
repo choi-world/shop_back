@@ -36,6 +36,7 @@ export class PrismaProductRepository implements ProductRepository {
         include: {
           product_image: {
             where: { is_primary: true, is_deleted: false },
+            orderBy: { product_image_idx: 'asc' },
             take: 1,
           },
         },
