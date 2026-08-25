@@ -1,10 +1,10 @@
-export interface ProductCreateRequest {
-  company_idx: number;
-  name: string;
-  price: number;
-  stock: number;
+import { ProductListResult } from '../../product/ProductListResult';
+
+export interface ListProductsRequest {
+  page: number;
+  size: number;
 }
 
 export interface ProductUseCase {
-  create(body: ProductCreateRequest): Promise<number>;
+  list(req: ListProductsRequest): Promise<ProductListResult>;
 }

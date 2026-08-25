@@ -35,6 +35,7 @@ model product {
   is_deleted      Boolean           @default(false)
   created_dt      DateTime?         @default(now()) @db.DateTime(0)
   updated_dt      DateTime?         @default(now()) @db.DateTime(0)
+  product_image   product_image[]
   shopping_basket shopping_basket[]
 
   @@index([company_idx], map: "company_idx")
@@ -129,4 +130,18 @@ model auth {
 
   @@unique([provider, provider_key], map: "uk_auth_provider_key")
   @@index([user_idx], map: "user_idx")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model product_image {
+  product_image_idx BigInt    @id @default(autoincrement())
+  product_idx       BigInt
+  image_url         String    @db.VarChar(255)
+  is_primary        Boolean   @default(false)
+  is_deleted        Boolean   @default(false)
+  created_dt        DateTime? @default(now()) @db.DateTime(0)
+  updated_dt        DateTime? @default(now()) @db.DateTime(0)
+  product           product   @relation(fields: [product_idx], references: [product_idx], onDelete: NoAction, onUpdate: NoAction, map: "fk_product_image_product")
+
+  @@index([product_idx], map: "product_idx")
 }

@@ -15,9 +15,11 @@ import { JwtTokenIssuer } from './adapter/out/security/JwtTokenIssuer';
 import { CartService } from './domain/cart/CartService';
 import { OrderService } from './domain/order/OrderService';
 import { AuthService } from './domain/auth/AuthService';
+import { ProductService } from './domain/product/ProductService';
 import { createCartController } from './adapter/in/http/CartController';
 import { createOrderController } from './adapter/in/http/OrderController';
 import { createAuthController } from './adapter/in/http/AuthController';
+import { createProductController } from './adapter/in/http/ProductController';
 import { errorHandler } from './adapter/in/http/errorHandler';
 
 // Composition root: the only place that knows about concrete adapters and
@@ -48,6 +50,7 @@ const authRepository = new PrismaAuthRepository(prisma);
 const passwordHasher = new BcryptPasswordHasher();
 const tokenIssuer = new JwtTokenIssuer(process.env.JWT_SECRET!);
 const authUseCase = new AuthService(authRepository, userRepository, passwordHasher, tokenIssuer);
+const productUseCase = new ProductService(productRepository);
 
 const app = express();
 app.use(express.json());
@@ -55,6 +58,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', createCartController(cartUseCase, tokenIssuer));
 app.use('/api', createOrderController(orderUseCase, tokenIssuer));
 app.use('/api', createAuthController(authUseCase));
+app.use('/api', createProductController(productUseCase));
 app.use(errorHandler);
 
 const PORT = process.env.PORT ?? 3000;

@@ -1,6 +1,7 @@
-import { PrismaClient } from '../../../generated/prisma/client';
-import { ProductRepository } from '../../../domain/port/out/ProductRepository';
+import { PrismaClient, Prisma } from '../../../generated/prisma/client';
+import { ProductRepository, ProductListQuery } from '../../../domain/port/out/ProductRepository';
 import { Product } from '../../../domain/product/Product';
+import { ProductListResult } from '../../../domain/product/ProductListResult';
 
 export class PrismaProductRepository implements ProductRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -19,5 +20,36 @@ export class PrismaProductRepository implements ProductRepository {
       Number(row.price),
       Number(row.stock),
     );
+  }
+
+  async list(query: ProductListQuery): Promise<ProductListResult> {
+    const where: Prisma.productWhereInput = { is_deleted: false };
+    // 나중에 검색/가격 필터가 추가되면 여기에 조건만 덧붙이면 됨 (findMany/count 둘 다 이 where를 공유)
+
+    const [rows, totalCount] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        skip: (query.page - 1) * query.size,
+        take: query.size,
+        orderBy: { product_idx: 'asc' },
+        include: {
+          product_image: {
+            where: { is_primary: true, is_deleted: false },
+            take: 1,
+          },
+        },
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    const items = rows.map((row) => ({
+      productIdx: Number(row.product_idx),
+      name: row.name,
+      price: Number(row.price),
+      stock: Number(row.stock),
+      thumbnailUrl: row.product_image[0]?.image_url ?? null,
+    }));
+
+    return { items, totalCount };
   }
 }

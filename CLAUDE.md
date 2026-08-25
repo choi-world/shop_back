@@ -27,12 +27,12 @@
 
 계층 간 주고받는 입출력 타입은 아래 접미사로 통일한다. 새로운 이름(`~Criteria`, `~Params`, `~Dto` 등)을 임의로 만들지 않는다.
 
-| 용도 | 접미사 | 예시 |
-|---|---|---|
-| 유스케이스(port-in)로 들어오는 입력 | `~Request` | `CheckoutRequest`, `SignupRequest`, `ListProductsRequest` |
-| 리포지토리(port-out)에 전달하는 **쓰기(생성/수정)** 입력 | `~Command` | `PlaceOrderCommand`, `CreateAuthCommand` |
-| 리포지토리(port-out)에 전달하는 **읽기(필터/페이지네이션)** 입력 | `~Query` | `ProductListQuery` |
-| 엔티티가 아닌, 조회 전용 응답(여러 테이블 join 결과 등) | `~View` | `CartItemView`, `ProductView` |
+| 용도                                                             | 접미사     | 예시                                                      |
+| ---------------------------------------------------------------- | ---------- | --------------------------------------------------------- |
+| 유스케이스(port-in)로 들어오는 입력                              | `~Request` | `CheckoutRequest`, `SignupRequest`, `ListProductsRequest` |
+| 리포지토리(port-out)에 전달하는 **쓰기(생성/수정)** 입력         | `~Command` | `PlaceOrderCommand`, `CreateAuthCommand`                  |
+| 리포지토리(port-out)에 전달하는 **읽기(필터/페이지네이션)** 입력 | `~Query`   | `ProductListQuery`                                        |
+| 엔티티가 아닌, 조회 전용 응답(여러 테이블 join 결과 등)          | `~View`    | `CartItemView`, `ProductView`                             |
 
 ## 기술 스택
 
