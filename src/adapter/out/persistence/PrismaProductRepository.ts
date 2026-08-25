@@ -2,6 +2,7 @@ import { PrismaClient, Prisma } from '../../../generated/prisma/client';
 import { ProductRepository, ProductListQuery } from '../../../domain/port/out/ProductRepository';
 import { Product } from '../../../domain/product/Product';
 import { ProductListResult } from '../../../domain/product/ProductListResult';
+import { ProductDetailView } from '../../../domain/product/ProductDetailView';
 
 export class PrismaProductRepository implements ProductRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -51,5 +52,27 @@ export class PrismaProductRepository implements ProductRepository {
     }));
 
     return { items, totalCount };
+  }
+
+  async findDetailById(productIdx: number): Promise<ProductDetailView | null> {
+    const row = await this.prisma.product.findUnique({
+      where: { product_idx: productIdx },
+      include: {
+        product_image: {
+          where: { is_deleted: false },
+          orderBy: { is_primary: 'desc' },
+        },
+      },
+    });
+
+    if (!row || row.is_deleted) return null;
+
+    return {
+      productIdx: Number(row.product_idx),
+      name: row.name,
+      price: Number(row.price),
+      stock: Number(row.stock),
+      imageUrls: row.product_image.map((image) => image.image_url),
+    };
   }
 }

@@ -39,5 +39,30 @@ export function createProductController(productUseCase: ProductUseCase): Router 
     res.status(200).json(result);
   });
 
+  /**
+   * @swagger
+   * /api/products/{productIdx}:
+   *   get:
+   *     summary: 상품 상세 조회
+   *     tags: [Product]
+   *     parameters:
+   *       - in: path
+   *         name: productIdx
+   *         required: true
+   *         schema: { type: integer }
+   *     responses:
+   *       200:
+   *         description: 상품 상세 정보 (없으면 null)
+   *       400:
+   *         description: productIdx가 유효하지 않음
+   */
+  router.get('/products/:productIdx', async (req, res) => {
+    const productIdx = Number(req.params.productIdx);
+    if (Number.isNaN(productIdx)) throw new ValidationError('productIdx는 숫자여야 합니다.');
+
+    const result = await productUseCase.getDetail(productIdx);
+    res.status(200).json(result);
+  });
+
   return router;
 }

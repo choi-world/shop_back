@@ -1,6 +1,7 @@
 import { ListProductsRequest, ProductUseCase } from '../port/in/ProductUseCase';
 import { ProductRepository } from '../port/out/ProductRepository';
 import { ProductListResult } from './ProductListResult';
+import { ProductDetailView } from './ProductDetailView';
 import { ValidationError } from '../error/ValidationError';
 
 const MAX_PAGE_SIZE = 100;
@@ -15,5 +16,9 @@ export class ProductService implements ProductUseCase {
     }
 
     return this.productRepository.list(req);
+  }
+
+  async getDetail(productIdx: number): Promise<ProductDetailView | null> {
+    return this.productRepository.findDetailById(productIdx);
   }
 }
