@@ -21,17 +21,13 @@ export class CartService implements CartUseCase {
     const product = await this.productRepository.findById(req.product_idx);
     if (!product) throw new NotFoundError('상품을 찾을 수 없습니다.');
 
-    const existing = await this.cartRepository.findByUserAndProduct(req.user_idx, req.product_idx);
-    const totalQuantity = (existing?.quantity ?? 0) + req.quantity;
-    if (product.stock < totalQuantity) throw new ConflictError('재고가 부족합니다.');
-
     const basket = new ShoppingBasket({
       userIdx: req.user_idx,
       productIdx: req.product_idx,
       quantity: req.quantity,
     });
 
-    return this.cartRepository.save(basket);
+    return this.cartRepository.save(basket, product.stock);
   }
 
   async update(req: CartUpdateRequest): Promise<number> {
